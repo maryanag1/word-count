@@ -1,0 +1,121 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+bool sp(char ch) {
+    return ch == ' '  || ch == '\t' || ch == '\n' || ch == '\r' || ch == '\v' || ch == '\f';
+}
+bool lalb(char ch) {
+    return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9');
+}
+bool same(const char* s, const char* t) {
+    int i = 0;
+    while (s[i] == t[i] && s[i] != '\0') {
+        i++;
+    }
+    return s[i] == t[i];
+}
+int main(int argc, char* argv[]) {
+    bool lines = false;
+    bool words = false;
+    bool alnum = false;
+    bool bytes = false;  
+    bool options = false;   
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] == '-') {
+            options = true;
+            if (same(argv[i], "--lines")) {
+                lines = true;
+            }
+            else if (same(argv[i], "--words")) {
+                words = true;
+            }
+            else if (same(argv[i], "--alnum")) {
+                alnum = true;
+            }
+            else if (same(argv[i], "--bytes")) {
+                bytes = true;
+            }
+            else if (argv[i][1] != '-') {
+                for (int j = 1; argv[i][j] != '\0'; j++) {
+                    if (argv[i][j] == 'l') {
+                        lines = true;
+                    }
+                    else if (argv[i][j] == 'w') {
+                        words = true;
+                    }
+                    else if (argv[i][j] == 'a') {
+                        alnum = true;
+                    }
+                    else if (argv[i][j] == 'c') {
+                        bytes = true;
+                    }
+                }
+            }
+        }
+    }
+    if (!options) {
+        lines = true;
+        words = true;
+        bytes = true;
+    }
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] == '-') {
+            continue;
+        }
+        ifstream file(argv[i]);
+        bool forl = false;
+        bool forw = false;
+        int b = 0;
+        int l = 0;
+        int w = 0;
+        int a = 0;
+        char ch;
+        while (file.get(ch)) {
+            b = b+1; ///подсчет байт
+            if (ch == '\n') { ///подсчет строк
+                l += 1;
+                forl = false;
+            }   
+            else {
+                forl = true;
+            }
+            if (sp(ch)) { ///подсчет слов
+                forw = false;
+            } 
+            else if (forw == false) {
+                w = w + 1;
+                forw = true;
+            }
+            if (lalb(ch)) {
+                a += 1;
+            }
+        }
+        if (forl) {
+            l += 1;
+        }
+        bool f = true;
+        if (lines) {
+            cout << l;
+            f = false;
+        }
+        if (words) {
+            if (!f) cout << " ";
+            cout << w;
+            f = false;
+        }
+        if (alnum) {
+            if (!f) cout << " ";
+            cout << a;
+            f = false;
+        }
+        if (bytes) {
+            if (!f) cout << " ";
+            cout << b;
+            f = false;
+        }
+        if (!f) {
+            cout << " ";
+            cout << argv[i] << "\n";
+        }
+    }
+}
